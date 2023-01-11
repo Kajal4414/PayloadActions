@@ -1,47 +1,63 @@
-name: Build and Release
+name: Extract and Release
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      ROM_URL:
+        description: "ROM_URL"
+        required: true
+        default: "https://github.com/TheStrechh/thestrechh_builds/releases/download/20221220-0147/lineage-20.0-20221220-UNOFFICIAL-spes.zip"
+      DEVICE_NAME:
+        description: "DEVICE_NAME"
+        required: true
+        default: "spes"
+      ROM_NAME:
+        description: "ROM_NAME"
+        required: true
+        default: "lineage-20.0"
+      EXTRACTED_FILES:
+        description: "EXTRACTED_FILES"
+        required: true
+        default: "boot.img, dtbo.img, product.img, system.img, system_ext.img"
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
     permissions: write-all
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    
-    - name: Download file
-      run: curl -LJO https://github.com/TheStrechh/thestrechh_builds/releases/download/20221220-0147/lineage-20.0-20221220-UNOFFICIAL-spes.zip
-    
-    - name: Unzip file
-      run: unzip lineage-20.0-20221220-UNOFFICIAL-spes.zip -d extracted_files/
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Setup Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.x
+      - name: Download file
+        run: curl -LJO ${{ github.event.inputs.ROM_URL }}
 
-    - name: Install OTA Extractor
-      run: |
-        git clone https://github.com/sakshiagrwal/OTAExtractor.git
-        cd OTAExtractor
-        git reset --hard HEAD~1
-        pip install protobuf==3.20.*
+      - name: Unzip file
+        run: unzip lineage-20.0-20221220-UNOFFICIAL-spes.zip -d extracted_files/
 
-    - name: Extract Payload
-      run: python OTAExtractor/payload_dumper.py extracted_files/payload.bin -o extracted_files/
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
 
-    - name: Upload to Release
-      uses: softprops/action-gh-release@v1
-      env:
+      - name: Install OTA Extractor
+        run: |
+          git clone https://github.com/sakshiagrwal/OTAExtractor.git
+          cd OTAExtractor
+          git reset --hard HEAD~1
+          pip install protobuf==3.20.*
+
+      - name: Extract Payload
+        run: python OTAExtractor/payload_dumper.py extracted_files/payload.bin -o extracted_files/
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v1
+        env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        files: boot.img, dtbo.img, product.img, system.img, system_ext.img
-        name: cr-${{ github.run_id }}
-        tag_name: ${{ github.run_id }}
-        body: |
-          Device: spes
-          Target: boot.img
+        with:
+          files: ${{ github.event.inputs.EXTRACTED_FILES }}
+          name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
+          tag_name: ${{ github.run_id }}
+          body: |
+            Device: ${{ github.event.inputs.DEVICE_NAME }}
+            Rom: ${{ github.event.inputs.ROM_NAME }}
+            Extracted files: ${{ github.event.inputs.EXTRACTED_FILES }}
