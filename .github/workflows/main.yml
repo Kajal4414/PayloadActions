@@ -14,7 +14,7 @@ on:
       ROM_NAME:
         description: "ROM_NAME"
         required: true
-        default: "lineage-20.0"
+        default: "lineage-20.0-20221220-UNOFFICIAL-spes.zip"
       EXTRACTED_FILES:
         description: "EXTRACTED_FILES"
         required: true
@@ -34,12 +34,7 @@ jobs:
       - name: Unzip file
         run: unzip $(basename ${{ github.event.inputs.ROM_URL }}) -d extracted_files/
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: 3.x
-
-      - name: Install OTA Extractor
+      - name: Install Payload Extractor
         run: |
           git clone https://github.com/sakshiagrwal/OTAExtractor.git
           cd OTAExtractor
@@ -59,5 +54,5 @@ jobs:
           tag_name: ${{ github.run_id }}
           body: |
             Device: ${{ github.event.inputs.DEVICE_NAME }}
-            Rom: ${{ github.event.inputs.ROM_NAME }}
+            Rom: [${{ github.event.inputs.ROM_NAME }}](${{ github.event.inputs.ROM_URL }})
             Files: ${{ github.event.inputs.EXTRACTED_FILES }}
