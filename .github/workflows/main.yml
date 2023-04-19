@@ -15,10 +15,6 @@ on:
         description: "ROM_NAME"
         required: true
         default: "lineage-20.0-20221220-UNOFFICIAL-spes.zip"
-      EXTRACTED_FILES:
-        description: "EXTRACTED_FILES"
-        required: true
-        default: "boot.img, dtbo.img, product.img, system.img, system_ext.img"
 
 jobs:
   build-and-release:
@@ -32,22 +28,21 @@ jobs:
         run: curl -LJO ${{ github.event.inputs.ROM_URL }}
 
       - name: Unzip file
-        run: unzip $(basename ${{ github.event.inputs.ROM_URL }}) -d extracted_files
+        run: unzip $(basename ${{ github.event.inputs.ROM_URL }}) -d zip_files
 
       - name: Extract Payload
         run: |
           pip install protobuf==3.20.*
-          python .github/scripts/payload_dumper.py extracted_files/payload.bin -d extracted_files
+          python .github/scripts/payload_dumper.py zip_files/payload.bin -d payload_files
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: ${{ github.event.inputs.EXTRACTED_FILES }}
+          files: payload_files/*
           name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
           tag_name: ${{ github.run_id }}
           body: |
             Device: ${{ github.event.inputs.DEVICE_NAME }}
             Rom: [${{ github.event.inputs.ROM_NAME }}](${{ github.event.inputs.ROM_URL }})
-            Files: ${{ github.event.inputs.EXTRACTED_FILES }}
