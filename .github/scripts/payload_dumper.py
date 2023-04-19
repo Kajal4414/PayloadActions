@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import os
 import struct
 import hashlib
 import bz2
@@ -52,10 +53,10 @@ def data_for_op(op):
     return data
 
 
-def dump_part(part):
+def dump_part(part, out_dir):
     print(part.partition_name)
 
-    out_file = open("%s.img" % part.partition_name, "wb")
+    out_file = open(os.path.join(out_dir, "%s.img" % part.partition_name), "wb")
     h = hashlib.sha256()
 
     for op in part.operations:
@@ -67,6 +68,11 @@ def dump_part(part):
 
 
 p = open(sys.argv[1], "rb")
+
+out_dir = sys.argv[3] if len(sys.argv) > 3 else "."
+
+if not os.path.exists(out_dir):
+    os.makedirs(out_dir)
 
 magic = p.read(4)
 assert magic == b"CrAU"
@@ -96,4 +102,4 @@ for part in dam.partitions:
     extents = flatten([op.dst_extents for op in part.operations])
     assert verify_contiguous(extents), "operations do not span full image"
 
-    dump_part(part)
+    dump_part(part, out_dir)
