@@ -34,15 +34,10 @@ jobs:
       - name: Unzip file
         run: unzip $(basename ${{ github.event.inputs.ROM_URL }}) -d extracted_files/
 
-      - name: Install Payload Extractor
-        run: |
-          git clone https://github.com/sakshiagrwal/OTAExtractor.git
-          cd OTAExtractor
-          git reset --hard HEAD~1
-          pip install protobuf==3.20.*
-
       - name: Extract Payload
-        run: python OTAExtractor/payload_dumper.py extracted_files/payload.bin
+        run: |
+          pip install protobuf==3.20.*
+          python .github/scripts/payload_dumper.py extracted_files/payload.bin
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
