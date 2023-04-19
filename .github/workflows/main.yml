@@ -38,6 +38,8 @@ jobs:
         run: |
           pip install protobuf==3.20.*
           python .github/scripts/payload_dumper.py extracted_files/payload.bin -d extracted_files
+          echo "Delete oversized files:"
+          find payload_files/ -type f -size +2G -print -delete
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
