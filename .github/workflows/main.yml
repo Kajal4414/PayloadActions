@@ -34,7 +34,7 @@ jobs:
       - name: Extract Payload
         run: |
           .github/scripts/android-ota-extractor ${{ github.event.inputs.ROM_NAME }}
-          echo "Delete oversized files:"
+          echo -e "\n\e[31mDeleting files larger than 2GB...\e[0m"
           find . -maxdepth 1 -type f -size +2G -print -delete
 
       - name: Upload to Release
