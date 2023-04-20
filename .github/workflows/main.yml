@@ -6,7 +6,7 @@ on:
       ROM_URL:
         description: "ROM_URL"
         required: true
-        default: "https://github.com/TheStrechh/thestrechh_builds/releases/download/20221220-0147/lineage-20.0-20221220-UNOFFICIAL-spes.zip"
+        default: "https://pixeldrain.com/api/file/WdArNVpq"
       DEVICE_NAME:
         description: "DEVICE_NAME"
         required: true
@@ -14,7 +14,7 @@ on:
       ROM_NAME:
         description: "ROM_NAME"
         required: true
-        default: "lineage-20.0-20221220-UNOFFICIAL-spes.zip"
+        default: "aospa-topaz-beta-2-spes-20230217.zip"
       EXTRACTED_FILES:
         description: "EXTRACTED_FILES"
         required: true
@@ -31,15 +31,11 @@ jobs:
       - name: Download file
         run: curl -LJO ${{ github.event.inputs.ROM_URL }}
 
-      - name: Unzip file
-        run: unzip $(basename ${{ github.event.inputs.ROM_URL }}) -d extracted_files
-
       - name: Extract Payload
         run: |
-          pip install protobuf==3.20.*
-          python .github/scripts/payload_dumper.py extracted_files/payload.bin -d extracted_files
+          .github/scripts/android-ota-extractor ${{ github.event.inputs.ROM_NAME }}
           echo "Delete oversized files:"
-          find payload_files/ -type f -size +2G -print -delete
+          find . -maxdepth 1 -type f -size +2G -print -delete
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
