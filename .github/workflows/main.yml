@@ -21,8 +21,8 @@ jobs:
       - name: Download file
         run: |
           curl -LJO ${{ github.event.inputs.ROM_URL }}
-          ZIP_FILE=$(basename -a /*.zip)
-          echo $ZIP_FILE
+          echo "ZIP_FILE=$(basename -a *.zip)" >> $GITHUB_ENV
+          echo "ZIP_FILE_SHA256=$(sha256sum *.zip | cut -d' ' -f1)" >> $GITHUB_ENV
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
@@ -34,4 +34,5 @@ jobs:
           tag_name: ${{ github.run_id }}
           body: |
             Device: ${{ github.event.inputs.DEVICE_NAME }}
-            Rom: [ROM URL](${{ github.event.inputs.ROM_URL }})
+            Rom: [${{ env.ZIP_FILE }}](${{ github.event.inputs.ROM_URL }})
+            SHA256: ${{ env.ZIP_FILE_SHA256 }}
