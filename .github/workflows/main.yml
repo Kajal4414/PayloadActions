@@ -27,7 +27,7 @@ jobs:
       - name: Extract Payload
         run: |
           chmod u+x .github/scripts/android-ota-extractor
-          .github/scripts/android-ota-extractor ${{ github.event.inputs.ROM_NAME }}
+          .github/scripts/android-ota-extractor *.zip
           echo -e "\n\e[31mDeleting files larger than 2GB...\e[0m"
           find . -maxdepth 1 -type f -size +2G -print -delete
           echo "ZIP_FILE=$(basename -a *.zip)" >> $GITHUB_ENV
