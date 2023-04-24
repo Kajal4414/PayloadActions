@@ -25,12 +25,10 @@ jobs:
         run: |
           chmod u+x .github/scripts/android-ota-extractor
           .github/scripts/android-ota-extractor *.zip
-          simg2img system.img system.raw.img
-          mkdir system/
-          sudo mount -o loop system.raw.img system/
-          sudo chmod -R 777 system/
-          cd system/
-          ls
+          sudo apt update
+          sudo apt install p7zip-full p7zip-rar
+          7z x product.img
+          cd data/ && ls
           echo "ZIP_FILE=$(basename -a *.zip)" >> $GITHUB_ENV
           echo "ZIP_FILE_SHA256=$(sha256sum *.zip | cut -d' ' -f1)" >> $GITHUB_ENV
 
