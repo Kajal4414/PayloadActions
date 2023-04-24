@@ -5,19 +5,12 @@ on:
     inputs:
       ROM_URL:
         description: "ROM_URL"
-        required: true
         default: "https://pixeldrain.com/api/file/WdArNVpq"
       DEVICE_NAME:
         description: "DEVICE_NAME"
-        required: true
         default: "spes"
-      ROM_NAME:
-        description: "ROM_NAME"
-        required: true
-        default: "aospa-topaz-beta-2-spes-20230217.zip"
       EXTRACTED_FILES:
         description: "EXTRACTED_FILES"
-        required: true
         default: "boot.img, dtbo.img, product.img, system.img, system_ext.img"
 
 jobs:
