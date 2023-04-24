@@ -9,9 +9,6 @@ on:
       DEVICE_NAME:
         description: "DEVICE_NAME"
         default: "spes"
-      EXTRACTED_FILES:
-        description: "EXTRACTED_FILES"
-        default: "boot.img, dtbo.img, product.img, system.img, system_ext.img"
 
 jobs:
   build-and-release:
@@ -28,8 +25,8 @@ jobs:
         run: |
           chmod u+x .github/scripts/android-ota-extractor
           .github/scripts/android-ota-extractor *.zip
-          echo -e "\n\e[31mDeleting files larger than 2GB...\e[0m"
-          find . -maxdepth 1 -type f -size +2G -print -delete
+          unzip product.img -d data
+          cd data/ && ls
           echo "ZIP_FILE=$(basename -a *.zip)" >> $GITHUB_ENV
           echo "ZIP_FILE_SHA256=$(sha256sum *.zip | cut -d' ' -f1)" >> $GITHUB_ENV
 
@@ -38,11 +35,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: ${{ github.event.inputs.EXTRACTED_FILES }}
+          files: data/*
           name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
           tag_name: ${{ github.run_id }}
           body: |
             Device: ${{ github.event.inputs.DEVICE_NAME }}
             Filename: [${{ env.ZIP_FILE }}](${{ github.event.inputs.ROM_URL }})
-            Extracted files: ${{ github.event.inputs.EXTRACTED_FILES }}
+            Extracted files: product.img
             SHA256: ${{ env.ZIP_FILE_SHA256 }}
