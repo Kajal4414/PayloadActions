@@ -30,6 +30,8 @@ jobs:
           .github/scripts/android-ota-extractor ${{ github.event.inputs.ROM_NAME }}
           echo -e "\n\e[31mDeleting files larger than 2GB...\e[0m"
           find . -maxdepth 1 -type f -size +2G -print -delete
+          echo "ZIP_FILE=$(basename -a *.zip)" >> $GITHUB_ENV
+          echo "ZIP_FILE_SHA256=$(sha256sum *.zip | cut -d' ' -f1)" >> $GITHUB_ENV
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
@@ -41,5 +43,6 @@ jobs:
           tag_name: ${{ github.run_id }}
           body: |
             Device: ${{ github.event.inputs.DEVICE_NAME }}
-            Rom: [${{ github.event.inputs.ROM_NAME }}](${{ github.event.inputs.ROM_URL }})
-            Files: ${{ github.event.inputs.EXTRACTED_FILES }}
+            Filename: [${{ env.ZIP_FILE }}](${{ github.event.inputs.ROM_URL }})
+            Extracted files: ${{ github.event.inputs.EXTRACTED_FILES }}
+            SHA256: ${{ env.ZIP_FILE_SHA256 }}
