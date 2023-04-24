@@ -21,6 +21,8 @@ jobs:
       - name: Download file
         run: |
           curl -LJO ${{ github.event.inputs.ROM_URL }}
+          ZIP_FILE=$(basename -a /*.zip)
+          echo $ZIP_FILE
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
