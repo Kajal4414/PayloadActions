@@ -5,19 +5,12 @@ on:
     inputs:
       ROM_URL:
         description: "ROM_URL"
-        required: true
         default: "https://pixeldrain.com/api/file/WdArNVpq"
       DEVICE_NAME:
         description: "DEVICE_NAME"
-        required: true
         default: "spes"
-      ROM_NAME:
-        description: "ROM_NAME"
-        required: true
-        default: "aospa-topaz-beta-2-spes-20230217.zip"
       EXTRACTED_FILES:
         description: "EXTRACTED_FILES"
-        required: true
         default: "boot.img, dtbo.img, product.img, system.img, system_ext.img"
 
 jobs:
@@ -34,9 +27,11 @@ jobs:
       - name: Extract Payload
         run: |
           chmod u+x .github/scripts/android-ota-extractor
-          .github/scripts/android-ota-extractor ${{ github.event.inputs.ROM_NAME }}
+          .github/scripts/android-ota-extractor *.zip
           echo -e "\n\e[31mDeleting files larger than 2GB...\e[0m"
           find . -maxdepth 1 -type f -size +2G -print -delete
+          echo "ZIP_FILE=$(basename -a *.zip)" >> $GITHUB_ENV
+          echo "ZIP_FILE_SHA256=$(sha256sum *.zip | cut -d' ' -f1)" >> $GITHUB_ENV
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
@@ -48,5 +43,6 @@ jobs:
           tag_name: ${{ github.run_id }}
           body: |
             Device: ${{ github.event.inputs.DEVICE_NAME }}
-            Rom: [${{ github.event.inputs.ROM_NAME }}](${{ github.event.inputs.ROM_URL }})
-            Files: ${{ github.event.inputs.EXTRACTED_FILES }}
+            Filename: [${{ env.ZIP_FILE }}](${{ github.event.inputs.ROM_URL }})
+            Extracted files: ${{ github.event.inputs.EXTRACTED_FILES }}
+            SHA256: ${{ env.ZIP_FILE_SHA256 }}
