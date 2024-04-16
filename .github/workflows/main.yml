@@ -29,7 +29,7 @@ jobs:
                   chmod u+x .github/scripts/android-ota-extractor
                   .github/scripts/android-ota-extractor *.zip
                   echo -e "\n\e[31mDeleting files larger than 2GB...\e[0m"
-                  find . -maxdepth 1 -type f -size +2147483648c -print -delete
+                  find . -maxdepth 1 -type f -size +2097152000c -print -delete
                   echo "ZIP_FILE=$(basename -a *.zip)" >> $GITHUB_ENV
                   echo "ZIP_FILE_SHA256=$(sha256sum *.zip | cut -d' ' -f1)" >> $GITHUB_ENV
 
