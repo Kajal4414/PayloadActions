@@ -28,10 +28,13 @@ jobs:
               run: |
                   chmod u+x .github/scripts/android-ota-extractor
                   .github/scripts/android-ota-extractor *.zip
-                  echo "ZIP_FILE=$(basename -a *.zip)" >> $GITHUB_ENV
-                  echo "ZIP_FILE_SHA256=$(sha256sum *.zip | cut -d' ' -f1)" >> $GITHUB_ENV
-                  echo -e "\n\e[31mDeleting files larger than 1.95 GB (2000 MB)...\e[0m"
-                  find . -maxdepth 1 -type f -size +2097152000c -print -delete
+                  echo -e "\n\e[31mDeleting files larger than 2 GB...\e[0m\n"
+                  for file in *; do
+                    if [ -f "$file" ] && [ $(stat -c %s "$file") -gt $((2*1024*1024*1024)) ]; then
+                      echo "$file ($(echo "scale=2; $(stat -c %s "$file") / (1024*1024*1024)" | bc) GB)"
+                      rm "$file"
+                    fi
+                  done
 
             - name: Upload to Release
               uses: softprops/action-gh-release@v2
