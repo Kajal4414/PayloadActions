@@ -5,13 +5,7 @@ on:
         inputs:
             ROM_URL:
                 description: "ROM_URL"
-                default: "https://builds.paranoidandroid.co/aospa-uvite-beta-oneplus9-20240412.zip"
-            DEVICE_NAME:
-                description: "DEVICE_NAME"
-                default: "oneplus9"
-            EXTRACTED_FILES:
-                description: "EXTRACTED_FILES"
-                default: "boot.img, dtbo.img, product.img, system.img, system_ext.img"
+                default: "https://github.com/sakshiagrwal/SourceforgeBackup/releases/download/crDroid/crDroidAndroid-13.0-20230607-spes-v9.5.zip"
 
 jobs:
     build-and-release:
@@ -28,16 +22,15 @@ jobs:
               run: |
                   chmod u+x .github/scripts/android-ota-extractor
                   .github/scripts/android-ota-extractor *.zip
-                  echo "ZIP_FILE=$(basename -a *.zip)" >> $GITHUB_ENV
-                  echo "ZIP_FILE_SHA256=$(sha256sum *.zip | cut -d' ' -f1)" >> $GITHUB_ENV
-
-                  large_files=$(find . -maxdepth 1 -type f -size +2G)
-                  if [ -n "$large_files" ]; then
-                    echo -e "\n::warning:: Deleting files larger than 2 GB..."
-                    for file in $large_files; do
-                      echo "$file ($(du -h "$file" | awk '{print $1}'))" && rm "$file"
-                    done
-                  fi
+                  find . ! -name 'product.img' -delete
+                  7z x product.img
+                  echo "__________________"
+                  ls
+                  echo "-------app--------"
+                  ls app
+                  echo "-----priv-app-----"
+                  ls priv-app
+                  echo "__________________"
 
             - name: Upload to Release
               uses: softprops/action-gh-release@v2
@@ -45,10 +38,7 @@ jobs:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
                   files: ${{ github.event.inputs.EXTRACTED_FILES }}
-                  name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
+                  name: ${{ github.run_id }}
                   tag_name: ${{ github.run_id }}
                   body: |
-                      Device: ${{ github.event.inputs.DEVICE_NAME }}
-                      Filename: [${{ env.ZIP_FILE }}](${{ github.event.inputs.ROM_URL }})
-                      Extracted files: ${{ github.event.inputs.EXTRACTED_FILES }}
-                      SHA256: ${{ env.ZIP_FILE_SHA256 }}
+                      Filename: priv-app/Dialer/Dialer.apk
