@@ -1,38 +1,25 @@
 name: ROM Mirror
 
 on:
-  workflow_dispatch:
-    inputs:
-      ROM_URL:
-        description: "ROM_URL"
-        default: "https://pixeldrain.com/api/file/WdArNVpq"
-      DEVICE_NAME:
-        description: "DEVICE_NAME"
-        default: "spes"
+  push:
+    branches:
+      - mirror
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-    permissions: write-all
+
     steps:
-      - name: Checkout code
+      - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Download file
+      - name: Download File
         run: |
-          curl -LJO ${{ github.event.inputs.ROM_URL }}
-          echo "ZIP_FILE=$(basename -a *.zip)" >> $GITHUB_ENV
-          echo "ZIP_FILE_SHA256=$(sha256sum *.zip | cut -d' ' -f1)" >> $GITHUB_ENV
+          curl -LJO https://bigota.d.miui.com/OS1.0.2.0.TGCINXM/miui_SPESINGlobal_OS1.0.2.0.TGCINXM_f57d472765_13.0.zip
 
-      - name: Upload to Release
-        uses: softprops/action-gh-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: GitHub Release
+        uses: softprops/action-gh-release@v2
         with:
+          name: spes
           files: ./*.zip
-          name: ${{ github.event.inputs.DEVICE_NAME }}-${{ github.run_id }}
           tag_name: ${{ github.run_id }}
-          body: |
-            Device: ${{ github.event.inputs.DEVICE_NAME }}
-            Rom: [${{ env.ZIP_FILE }}](${{ github.event.inputs.ROM_URL }})
-            SHA256: ${{ env.ZIP_FILE_SHA256 }}
