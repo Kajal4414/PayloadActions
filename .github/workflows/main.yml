@@ -24,3 +24,5 @@ jobs:
           name: spes
           files: ./*.zip
           tag_name: ${{ github.run_id }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
