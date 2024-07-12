@@ -15,7 +15,7 @@ jobs:
 
       - name: Download File
         run: |
-          curl -LJO https://bigota.d.miui.com/OS1.0.2.0.TGCINXM/miui_SPESINGlobal_OS1.0.2.0.TGCINXM_f57d472765_13.0.zip
+          curl -LJO https://cdnorg.d.miui.com/V14.0.7.0.TGKEUXM/miui_SPESNEEAGlobal_V14.0.7.0.TGKEUXM_a82d2c3e33_13.0.zip
           export GH_UPLOAD_LIMIT="4294967296"
 
       - name: GitHub Release
