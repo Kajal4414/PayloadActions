@@ -16,6 +16,7 @@ jobs:
       - name: Download File
         run: |
           curl -LJO https://bigota.d.miui.com/OS1.0.2.0.TGCINXM/miui_SPESINGlobal_OS1.0.2.0.TGCINXM_f57d472765_13.0.zip
+          export GH_UPLOAD_LIMIT="4294967296"
 
       - name: GitHub Release
         uses: softprops/action-gh-release@v2
