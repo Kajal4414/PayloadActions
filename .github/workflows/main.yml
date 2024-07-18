@@ -35,6 +35,6 @@ jobs:
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
-                  files: priv-app/Dialer/Dialer.apk
+                  files: priv-app/*/*.apk
                   name: ${{ github.run_id }}
                   tag_name: ${{ github.run_id }}
