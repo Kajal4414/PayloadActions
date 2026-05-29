@@ -6,35 +6,35 @@ on:
       - "data"
 
 jobs:
-    build-and-release:
-        runs-on: ubuntu-latest
-        permissions: write-all
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+  build-and-release:
+    runs-on: ubuntu-latest
+    permissions: write-all
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-            - name: Download file
-              run: curl -LJO https://sourceforge.net/projects/crdroid/files/RMX1921/7.x/crDroidAndroid-11.0-20210913-RMX1921-v7.10.zip/download
+      - name: Download file
+        run: curl -LJO https://sourceforge.net/projects/crdroid/files/RMX1921/7.x/crDroidAndroid-11.0-20210913-RMX1921-v7.10.zip/download
 
-            - name: Extract Payload
-              run: |
-                  chmod u+x .github/scripts/android-ota-extractor
-                  .github/scripts/android-ota-extractor *.zip
-                  find . ! -name 'product.img' -delete
-                  7z x product.img
-                  echo "__________________"
-                  ls
-                  echo "-------app--------"
-                  ls app
-                  echo "-----priv-app-----"
-                  ls priv-app
-                  echo "__________________"
+      - name: Extract Payload
+        run: |
+          chmod u+x .github/scripts/android-ota-extractor
+          .github/scripts/android-ota-extractor *.zip
+          find . ! -name 'product.img' -delete
+          7z x product.img
+          echo "__________________"
+          ls
+          echo "-------app--------"
+          ls app
+          echo "-----priv-app-----"
+          ls priv-app
+          echo "__________________"
 
-            - name: Upload to Release
-              uses: softprops/action-gh-release@v2
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              with:
-                  files: app/*/*.apk
-                  name: ${{ github.run_id }}
-                  tag_name: ${{ github.run_id }}
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: app/*/*.apk
+          name: ${{ github.run_id }}
+          tag_name: ${{ github.run_id }}
