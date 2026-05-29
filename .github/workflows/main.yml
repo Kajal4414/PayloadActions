@@ -8,33 +8,48 @@ on:
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-    permissions: write-all
+    permissions:
+      contents: write
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Download file
-        run: curl -LJO https://sourceforge.net/projects/crdroid/files/RMX1921/7.x/crDroidAndroid-11.0-20210913-RMX1921-v7.10.zip/download
-
-      - name: Extract Payload
+      - name: Download OTA zip
         run: |
-          chmod u+x .github/scripts/android-ota-extractor
-          .github/scripts/android-ota-extractor *.zip
-          find . ! -name 'product.img' -delete
-          7z x product.img
-          echo "__________________"
-          ls
-          echo "-------app--------"
-          ls app
-          echo "-----priv-app-----"
-          ls priv-app
-          echo "__________________"
+          curl -LJO https://github.com/muralivijay/crdroid_a13_OTA_spes/releases/download/v9.36/crDroidAndroid-13.0-20260510-spes-v9.36-Vanilla.zip
+          echo "OTA_ZIP=$(ls *.zip)" >> $GITHUB_ENV
 
-      - name: Upload to Release
-        uses: softprops/action-gh-release@v2
+      - name: Extract payload
+        run: |
+          chmod +x .github/scripts/android-ota-extractor
+          .github/scripts/android-ota-extractor "${{ env.OTA_ZIP }}"
+
+      - name: Extract product.img
+        run: |
+          7z x product.img "-oproduct_extracted/"
+          echo "--- app ---"
+          ls product_extracted/app || echo "(empty)"
+          echo "--- priv-app ---"
+          ls product_extracted/priv-app || echo "(empty)"
+
+      - name: Collect APKs
+        run: |
+          mkdir -p release_apks
+          find product_extracted/app      -name "*.apk" -exec cp {} release_apks/ \;
+          find product_extracted/priv-app -name "*.apk" -exec cp {} release_apks/ \;
+          echo "APKs to upload:"
+          ls release_apks/
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: release_apks/*.apk
+          name: "Build ${{ github.run_id }}"
+          tag_name: "build-${{ github.run_id }}"
+          body: |
+            **Source:** `${{ env.OTA_ZIP }}`
+            **Run:** ${{ github.run_id }}
+            **Commit:** ${{ github.sha }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          files: app/*/*.apk
-          name: ${{ github.run_id }}
-          tag_name: ${{ github.run_id }}
