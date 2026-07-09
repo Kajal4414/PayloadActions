@@ -5,10 +5,10 @@ on:
         inputs:
             ROM_URL:
                 description: "ROM_URL"
-                default: "https://builds.paranoidandroid.co/aospa-uvite-beta-oneplus9-20240412.zip"
+                default: "https://bkt-sgp-miui-ota-update-alisgp.oss-ap-southeast-1.aliyuncs.com/OS3.0.2.0.WNRINXM/garnet_in_global_images_OS3.0.2.0.WNRINXM_20260320.0000.00_16.0_in_fd98e69088.tgz"
             DEVICE_NAME:
                 description: "DEVICE_NAME"
-                default: "oneplus9"
+                default: "garnet"
             EXTRACTED_FILES:
                 description: "EXTRACTED_FILES"
                 default: "boot.img, dtbo.img, product.img, system.img, system_ext.img"
@@ -21,18 +21,21 @@ jobs:
             - name: Checkout Code
               uses: actions/checkout@v7
 
-            - name: Download File
+            - name: Download ROM
               run: curl -LJO ${{ github.event.inputs.ROM_URL }}
 
-            - name: Extract Payload
+            - name: Extract ROM
               run: |
-                FILE=$(echo *.zip *.tgz)
+                FILE=$(ls *.zip *.tgz 2>/dev/null | head -1)
 
                 echo "ZIP_FILE=$FILE" >> $GITHUB_ENV
                 echo "ZIP_FILE_SHA256=$(sha256sum "$FILE" | cut -d' ' -f1)" >> $GITHUB_ENV
 
                 if [[ $FILE == *.tgz ]]; then
+                  ls
                   tar -xzf "$FILE"
+                  ls
+                  ls */
                   cp "$(find . -name boot.img | head -1)" .
                   echo "EXTRACTED_FILES=boot.img" >> $GITHUB_ENV
                 else
