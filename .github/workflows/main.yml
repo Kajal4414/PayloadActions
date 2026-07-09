@@ -18,29 +18,32 @@ jobs:
         runs-on: ubuntu-latest
         permissions: write-all
         steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
+            - name: Checkout Code
+              uses: actions/checkout@v7
 
-            - name: Download file
+            - name: Download File
               run: curl -LJO ${{ github.event.inputs.ROM_URL }}
 
             - name: Extract Payload
               run: |
-                  chmod u+x .github/scripts/android-ota-extractor
-                  .github/scripts/android-ota-extractor *.zip
-                  echo "ZIP_FILE=$(basename -a *.zip)" >> $GITHUB_ENV
-                  echo "ZIP_FILE_SHA256=$(sha256sum *.zip | cut -d' ' -f1)" >> $GITHUB_ENV
+                FILE=$(echo *.zip *.tgz)
 
-                  large_files=$(find . -maxdepth 1 -type f -size +2G)
-                  if [ -n "$large_files" ]; then
-                    echo -e "\n::warning:: Deleting files larger than 2 GB..."
-                    for file in $large_files; do
-                      echo "$file ($(du -h "$file" | awk '{print $1}'))" && rm "$file"
-                    done
-                  fi
+                echo "ZIP_FILE=$FILE" >> $GITHUB_ENV
+                echo "ZIP_FILE_SHA256=$(sha256sum "$FILE" | cut -d' ' -f1)" >> $GITHUB_ENV
 
-            - name: Upload to Release
-              uses: softprops/action-gh-release@v2
+                if [[ $FILE == *.tgz ]]; then
+                  tar -xzf "$FILE"
+                  cp "$(find . -name boot.img | head -1)" .
+                  echo "EXTRACTED_FILES=boot.img" >> $GITHUB_ENV
+                else
+                  chmod +x .github/scripts/android-ota-extractor
+                  .github/scripts/android-ota-extractor "$FILE"
+                fi
+
+                find . -maxdepth 1 -type f -size +2G -delete
+
+            - name: GH Release
+              uses: softprops/action-gh-release@v3
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
               with:
