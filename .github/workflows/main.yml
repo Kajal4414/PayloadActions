@@ -26,7 +26,11 @@ jobs:
 
             - name: Extract ROM
               run: |
-                FILE=$(ls *.zip *.tgz 2>/dev/null | head -1)
+                FILE=$(find . -maxdepth 1 -type f \( -name '*.zip' -o -name '*.tgz' \) -printf '%f\n' | head -1)
+                if [[ -z "$FILE" ]]; then
+                  echo "No .zip or .tgz ROM file found after download."
+                  exit 1
+                fi
 
                 echo "ZIP_FILE=$FILE" >> $GITHUB_ENV
                 echo "ZIP_FILE_SHA256=$(sha256sum "$FILE" | cut -d' ' -f1)" >> $GITHUB_ENV
